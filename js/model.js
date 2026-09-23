@@ -88,12 +88,34 @@ const Model = {
     return students.slice().sort((a, b) => Model.label(a).localeCompare(Model.label(b), 'fr'));
   },
 
-  save(cls) {
+  /** Enregistre une classe : envoie vers Supabase Storage les photos pas encore mises en ligne
+   *  (data URL locales), et retire du Storage les photos des élèves qui ne sont plus dans la classe. */
+  async save(cls) {
     cls.updatedAt = Date.now();
+    const previous = await DB.get(cls.id);
+    for (const s of cls.students) {
+      if (Photos.isDataURL(s.photo)) s.photo = await Photos.upload(cls.id, s.id, s.photo);
+    }
+    if (previous) {
+      const stillHere = new Set(cls.students.map(s => s.id));
+      const removedPaths = previous.students
+        .filter(s => !stillHere.has(s.id) && s.photo && !Photos.isDataURL(s.photo))
+        .map(s => s.photo);
+      if (removedPaths.length) await Photos.remove(removedPaths);
+    }
     return DB.put(cls);
   },
 
-  exportData(classes) {
-    return { app: 'plan-de-classe', version: 1, exportedAt: new Date().toISOString(), classes };
+  /** Sauvegarde exportable en `.json` : reconstitue les photos en data URL pour que le fichier
+   *  reste autonome (utilisable hors ligne ou sur un autre projet), sans dépendre du Storage. */
+  async exportData(classes) {
+    const withPhotos = await Promise.all(classes.map(async cls => ({
+      ...cls,
+      students: await Promise.all(cls.students.map(async s => ({
+        ...s,
+        photo: s.photo && !Photos.isDataURL(s.photo) ? await Photos.download(s.photo) : (s.photo || ''),
+      }))),
+    })));
+    return { app: 'plan-de-classe', version: 1, exportedAt: new Date().toISOString(), classes: withPhotos };
   },
 };

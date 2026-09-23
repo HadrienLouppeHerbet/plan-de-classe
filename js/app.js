@@ -18,6 +18,7 @@ const App = (() => {
     currentHash = hash;
     $$('.modal-backdrop').forEach(m => m.remove());
     document.body.classList.remove('no-scroll');
+    await Auth.ready();
     if (!Auth.isUnlocked()) {
       Auth.renderLogin(route);
       return;
@@ -64,4 +65,10 @@ const App = (() => {
 })();
 
 $('#logout').onclick = Auth.logout;
+
+// Frein basique contre la copie occasionnelle des photos (n'empêche pas les outils dev).
+document.addEventListener('contextmenu', e => {
+  if (e.target.closest('.photo, .photo-btn, .faces img, .bench-item img, .thumb')) e.preventDefault();
+});
+
 App.start();

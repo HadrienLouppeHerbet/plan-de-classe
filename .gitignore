@@ -2,3 +2,8 @@
 plan_de_classe_avec_photos.html
 sauvegarde*.json
 *.json
+
+# Secrets (mots de passe, clés) : jamais publiés
+*.local.md
+.env
+.env.*

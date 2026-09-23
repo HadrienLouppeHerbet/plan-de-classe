@@ -5,7 +5,7 @@ const HomeView = (() => {
     return `${n} ${word}${n > 1 ? 's' : ''}`;
   }
 
-  function cardHTML(cls) {
+  function cardHTML(cls, photoCache) {
     const n = cls.students.length;
     const placed = Object.keys(cls.assignments).length;
     const faces = cls.students.filter(s => s.photo).slice(0, 8);
@@ -17,7 +17,7 @@ const HomeView = (() => {
           <div class="muted small">${plural(n, 'élève')} · ${plural(Model.seatCount(cls), 'place')} · ${plural(cls.columns.length, 'colonne')}</div>
         </div>
         <div class="faces">
-          ${faces.map(s => `<img src="${s.photo}" alt="" title="${esc(Model.label(s))}">`).join('')}
+          ${faces.map(s => `<img src="${Photos.srcFor(s.photo, photoCache)}" alt="" title="${esc(Model.label(s))}">`).join('')}
           ${more > 0 ? `<span class="more">+${more}</span>` : ''}
           ${n === 0 ? '<span class="muted small">Aucun élève pour l’instant</span>' : ''}
         </div>
@@ -34,6 +34,7 @@ const HomeView = (() => {
 
   async function render() {
     const classes = (await DB.all()).sort((a, b) => b.updatedAt - a.updatedAt);
+    const photoCache = await Photos.resolveAll(classes.flatMap(c => c.students));
     $('#app').innerHTML = `
       <section class="hero">
         <div>
@@ -46,7 +47,7 @@ const HomeView = (() => {
           <a class="btn primary" href="#/nouvelle">+ Nouvelle classe</a>
         </div>
       </section>
-      ${classes.length ? `<section class="class-grid">${classes.map(cardHTML).join('')}</section>` : `
+      ${classes.length ? `<section class="class-grid">${classes.map(cls => cardHTML(cls, photoCache)).join('')}</section>` : `
         <section class="card empty">
           <div class="empty-board">TABLEAU</div>
           <h2>Aucune classe pour le moment</h2>
@@ -57,7 +58,10 @@ const HomeView = (() => {
         Pensez à <strong>exporter</strong> une sauvegarde pour les conserver ou les utiliser sur un autre poste.</p>`;
 
     $('#import-backup').onclick = importBackup;
-    if (classes.length) $('#export-all').onclick = () => downloadJSON(Model.exportData(classes), 'plans-de-classe.json');
+    if (classes.length) $('#export-all').onclick = async () => {
+      toast('Préparation de l\'export…');
+      downloadJSON(await Model.exportData(classes), 'plans-de-classe.json');
+    };
 
     $$('.class-card').forEach(card => {
       const cls = classes.find(c => c.id === card.dataset.id);
@@ -70,10 +74,13 @@ const HomeView = (() => {
         toast('Classe dupliquée.');
         render();
       };
-      card.querySelector('[data-act="export"]').onclick = () =>
-        downloadJSON(Model.exportData([cls]), `classe-${slugify(cls.name)}.json`);
+      card.querySelector('[data-act="export"]').onclick = async () => {
+        toast('Préparation de l\'export…');
+        downloadJSON(await Model.exportData([cls]), `classe-${slugify(cls.name)}.json`);
+      };
       card.querySelector('[data-act="delete"]').onclick = async () => {
         if (!await confirmDialog(`Supprimer définitivement la classe « ${cls.name} » ?`, { ok: 'Supprimer', danger: true })) return;
+        await Photos.removeClassFolder(cls.id);
         await DB.remove(cls.id);
         toast('Classe supprimée.');
         render();
@@ -96,7 +103,7 @@ const HomeView = (() => {
         cls.id = uid();
         cls.name += ' (importée)';
       }
-      await DB.put(cls);
+      await Model.save(cls);
     }
     toast(list.length > 1 ? `${list.length} classes importées.` : 'Classe importée.');
     render();

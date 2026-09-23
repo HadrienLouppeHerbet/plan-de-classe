@@ -2,11 +2,13 @@
 
 const PlanView = (() => {
   let cls = null;
+  let photoCache = new Map();
 
   async function render(id) {
     cls = await DB.get(id);
     if (!cls) { toast('Classe introuvable.'); location.hash = '#/'; return; }
     Model.sanitize(cls);
+    photoCache = await Photos.resolveAll(cls.students);
 
     $('#app').innerHTML = `
       <div class="plan-head">
@@ -65,7 +67,7 @@ const PlanView = (() => {
       seat.innerHTML = student ? `
         <button class="remove" data-remove title="Retirer de cette place">×</button>
         <div class="person" draggable="true" data-student="${esc(student.id)}">
-          ${student.photo ? `<img class="photo" src="${student.photo}" alt="">` : '<div class="photo placeholder"></div>'}
+          ${student.photo ? `<img class="photo" src="${Photos.srcFor(student.photo, photoCache)}" alt="">` : '<div class="photo placeholder"></div>'}
           <div class="first">${esc(student.firstName)}</div>
           <div class="last">${esc(student.lastName)}</div>
         </div>` : `
@@ -80,7 +82,7 @@ const PlanView = (() => {
       <div class="bench-list">
         ${waiting.map(s => `
           <div class="bench-item" draggable="true" data-student="${esc(s.id)}">
-            ${s.photo ? `<img src="${s.photo}" alt="">` : '<div class="thumb placeholder"></div>'}
+            ${s.photo ? `<img src="${Photos.srcFor(s.photo, photoCache)}" alt="">` : '<div class="thumb placeholder"></div>'}
             <span>${esc(Model.label(s))}</span>
           </div>`).join('') || '<p class="muted small">Tous les élèves sont placés ✔</p>'}
       </div>`;

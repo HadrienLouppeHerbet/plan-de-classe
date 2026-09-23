@@ -81,6 +81,13 @@ input.num { width: 64px; }
 .faces img, .faces .more { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #fff; margin-left: -8px; box-shadow: 0 0 0 1px var(--border); }
 .faces img { object-fit: cover; object-position: center top; }
 .faces img:first-child { margin-left: 0; }
+
+/* Frein basique contre la copie occasionnelle des photos (clic-droit désactivé en JS ailleurs) :
+   ne bloque pas quelqu'un qui utilise les outils de développement, seulement les gestes courants. */
+.photo, .photo-btn img, .faces img, .bench-item img, .thumb {
+  -webkit-user-drag: none;
+  user-select: none;
+}
 .faces .more { display: inline-flex; align-items: center; justify-content: center; background: #eef1f4; font-size: 12px; font-weight: 700; color: var(--muted); }
 .empty { text-align: center; padding: 48px 20px; }
 .empty-board { display: inline-block; margin-bottom: 18px; padding: 10px 40px; background: var(--board); color: #fff; font-weight: 700; letter-spacing: .1em; border: 5px solid var(--board-frame); border-radius: 4px; }

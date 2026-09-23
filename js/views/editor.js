@@ -10,8 +10,9 @@ const EditorView = (() => {
   async function render(id) {
     const stored = id ? await DB.get(id) : Model.create();
     if (!stored) { toast('Classe introuvable.'); location.hash = '#/'; return; }
-    state = { cls: structuredClone(stored), isNew: !id, dirty: false };
+    state = { cls: structuredClone(stored), isNew: !id, dirty: false, photoCache: new Map() };
     App.setLeaveGuard(() => state.dirty);
+    state.photoCache = await Photos.resolveAll(state.cls.students);
 
     const cls = state.cls;
     $('#app').innerHTML = `
@@ -113,7 +114,7 @@ const EditorView = (() => {
     return `
       <div class="student-item" data-id="${esc(s.id)}">
         <button class="photo-btn" title="Changer la photo">
-          ${s.photo ? `<img src="${s.photo}" alt="">` : '<span>+ photo</span>'}
+          ${s.photo ? `<img src="${Photos.srcFor(s.photo, state.photoCache)}" alt="">` : '<span>+ photo</span>'}
         </button>
         <div class="names">
           <input type="text" data-key="lastName" placeholder="NOM" value="${esc(s.lastName)}">

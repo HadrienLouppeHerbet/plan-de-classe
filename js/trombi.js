@@ -372,11 +372,17 @@ const Trombi = (() => {
   }
 
   const NON_NAME = new RegExp(`[^${LETTERS}' -]`, 'g');
+  // Statut d'internat imprimé à côté du nom sur certains trombinoscopes (interne, demi-pensionnaire,
+  // externe) : ce ne sont pas des mots du nom, on les retire avant l'analyse.
+  const STATUS_CODES = new Set(['INT', 'DP', 'EXT']);
 
   /** Garde la première ligne lisible (et la suivante si la première n'a qu'un mot). */
   function pickName(text) {
     const lines = text.split('\n')
-      .map(l => l.replace(NON_NAME, ' ').split(/\s+/).filter(t => t.replace(/['-]/g, '').length >= 2).join(' '))
+      .map(l => l.replace(NON_NAME, ' ').split(/\s+/)
+        .filter(t => t.replace(/['-]/g, '').length >= 2)
+        .filter(t => !STATUS_CODES.has(t.toLocaleUpperCase('fr-FR')))
+        .join(' '))
       .filter(Boolean);
     if (!lines.length) return '';
     let words = lines[0].split(' ');

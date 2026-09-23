@@ -211,7 +211,10 @@ const TrombiImport = (() => {
     const duplicate = it.read && s.existing.has(Model.label(it).toLowerCase());
     return `
       <div class="result-item ${it.keep ? '' : 'excluded'}" data-i="${i}">
-        <img src="${it.photoURL}" alt="">
+        <div class="result-photo">
+          <img src="${it.photoURL}" alt="">
+          <button type="button" class="crop-btn" data-crop title="Rogner la photo">✂</button>
+        </div>
         <div class="names">
           <label class="check"><input type="checkbox" data-keep ${it.keep ? 'checked' : ''}> n° ${i + 1}
             ${duplicate ? '<span class="tag">déjà dans la classe</span>' : ''}</label>
@@ -257,6 +260,15 @@ const TrombiImport = (() => {
       const it = s.items[+e.target.closest('.result-item').dataset.i];
       it[key] = key === 'lastName' ? formatLastName(it[key]) : formatFirstName(it[key]);
       e.target.value = it[key];
+    };
+    grid.onclick = async e => {
+      const cropBtn = e.target.closest('[data-crop]');
+      if (!cropBtn) return;
+      const i = +e.target.closest('.result-item').dataset.i;
+      const it = s.items[i];
+      const img = await loadImage(it.photoURL);
+      const cropped = await cropModal(img);
+      if (cropped) { it.photoURL = cropped; updateResult(i); }
     };
     grid.onmouseover = e => {
       const item = e.target.closest('.result-item');

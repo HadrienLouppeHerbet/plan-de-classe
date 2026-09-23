@@ -193,7 +193,10 @@ const EditorView = (() => {
         const file = await pickFile('image/*');
         if (!file) return;
         try {
-          s.photo = await fileToPhoto(file);
+          const img = await loadImageFile(file);
+          const cropped = await cropModal(img);
+          if (!cropped) return;
+          s.photo = cropped;
           markDirty();
           item.outerHTML = studentHTML(s);
         } catch (err) { toast(err.message); }

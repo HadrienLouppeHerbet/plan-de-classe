@@ -78,7 +78,6 @@ const EditorView = (() => {
   function renderPreview() {
     const cls = state.cls;
     $('#layout-preview').innerHTML = `
-      <div class="mini-board">TABLEAU</div>
       <div class="mini-room">
         ${cls.columns.map((col, i) => `
           <div class="mini-col">
@@ -86,7 +85,8 @@ const EditorView = (() => {
               <div class="mini-row">${'<span class="mini-seat"></span>'.repeat(col.seats)}</div>`).join('')}
             <div class="mini-caption">Col. ${i + 1} · ${col.rows * col.seats} pl.</div>
           </div>`).join('')}
-      </div>`;
+      </div>
+      <div class="mini-board">TABLEAU</div>`;
 
     const seats = Model.seatCount(cls);
     const students = cls.students.length;

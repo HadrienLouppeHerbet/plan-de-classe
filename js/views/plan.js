@@ -26,8 +26,8 @@ const PlanView = (() => {
       </div>
       <div class="plan-layout">
         <div class="plan-main">
-          <div class="board">TABLEAU</div>
           <div class="room" id="room"></div>
+          <div class="board">TABLEAU</div>
         </div>
         <aside class="card bench no-print" id="bench"></aside>
       </div>`;
@@ -40,11 +40,13 @@ const PlanView = (() => {
   function buildRoom() {
     const room = $('#room');
     room.style.gridTemplateColumns = cls.columns.map(c => `minmax(${c.seats * 96}px, ${c.seats}fr)`).join(' ');
+    // Le tableau est en bas de page : on affiche la rangée 1 (la plus proche du tableau)
+    // en dernier, tout en bas, sans changer le numéro de rangée des places existantes.
     room.innerHTML = cls.columns.map((col, c) => `
       <section class="zone">
         <h3>Colonne ${c + 1}</h3>
         <div class="rows">
-          ${Array.from({ length: col.rows }, (_, r) => `
+          ${Array.from({ length: col.rows }, (_, i) => col.rows - 1 - i).map(r => `
             <div class="row" style="grid-template-columns: repeat(${col.seats}, minmax(88px, 1fr))">
               ${Array.from({ length: col.seats }, (_, p) =>
                 `<div class="seat" data-seat="${Model.seatId(c, r, p)}"></div>`).join('')}

@@ -101,7 +101,7 @@ input.num { width: 64px; }
 .col-cfg { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafbfc; }
 .col-cfg .inline { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .layout-preview { padding: 16px; border: 1px dashed var(--border); border-radius: 8px; background: #fafbfc; overflow-x: auto; }
-.mini-board { width: min(320px, 80%); margin: 0 auto 16px; padding: 4px; background: var(--board); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-align: center; border: 3px solid var(--board-frame); border-radius: 3px; }
+.mini-board { width: min(320px, 80%); margin: 16px auto 0; padding: 4px; background: var(--board); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-align: center; border: 3px solid var(--board-frame); border-radius: 3px; }
 .mini-room { display: flex; justify-content: center; align-items: flex-start; gap: 26px; width: max-content; min-width: 100%; }
 .mini-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .mini-row { display: flex; gap: 3px; }
@@ -174,7 +174,7 @@ input.num { width: 64px; }
 .plan-head p { margin: 0; }
 .plan-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 20px; align-items: start; }
 .plan-main { overflow-x: auto; padding-bottom: 8px; }
-.board { max-width: 700px; margin: 0 auto 24px; padding: 12px; background: var(--board); color: #fff; text-align: center; font-size: 24px; font-weight: 700; letter-spacing: .12em; border: 7px solid var(--board-frame); border-radius: 5px; }
+.board { max-width: 700px; margin: 24px auto 0; padding: 12px; background: var(--board); color: #fff; text-align: center; font-size: 24px; font-weight: 700; letter-spacing: .12em; border: 7px solid var(--board-frame); border-radius: 5px; }
 .room { display: grid; gap: 32px; align-items: start; }
 .zone h3 { margin: 0 0 10px; text-align: center; font-size: 13px; font-weight: 600; color: var(--muted); }
 .rows { display: flex; flex-direction: column; gap: 16px; }
@@ -221,7 +221,7 @@ input.num { width: 64px; }
   .plan-layout { display: block; }
   .plan-main { overflow: visible; }
   .plan-head { margin-bottom: 8px; }
-  .board { margin-bottom: 14px; padding: 6px; font-size: 18px; border-width: 4px; }
+  .board { margin: 14px auto 0; padding: 6px; font-size: 18px; border-width: 4px; }
   .room { gap: 18px; }
   .rows { gap: 8px; }
   .seat { min-height: 0; padding: 4px; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }

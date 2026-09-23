@@ -111,11 +111,15 @@ const EditorView = (() => {
   /* ---------- Élèves ---------- */
 
   function studentHTML(s) {
+    const src = s.photo ? Photos.srcFor(s.photo, state.photoCache) : '';
     return `
       <div class="student-item" data-id="${esc(s.id)}">
-        <button class="photo-btn" title="Changer la photo">
-          ${s.photo ? `<img src="${Photos.srcFor(s.photo, state.photoCache)}" alt="">` : '<span>+ photo</span>'}
-        </button>
+        <div class="photo-wrap">
+          <button class="photo-btn" title="Changer la photo">
+            ${src ? `<img src="${src}" alt="">` : '<span>+ photo</span>'}
+          </button>
+          ${src ? '<button type="button" class="crop-btn" data-recrop title="Rogner cette photo">✂</button>' : ''}
+        </div>
         <div class="names">
           <input type="text" data-key="lastName" placeholder="NOM" value="${esc(s.lastName)}">
           <input type="text" data-key="firstName" placeholder="Prénom" value="${esc(s.firstName)}">
@@ -189,6 +193,18 @@ const EditorView = (() => {
         cls.students = cls.students.filter(x => x !== s);
         markDirty();
         renderStudents();
+      } else if (e.target.closest('[data-recrop]')) {
+        try {
+          // Repasse par le contenu réel du fichier (pas l'URL signée) : une image chargée
+          // depuis une autre origine rendrait le canvas de recadrage illisible (CORS).
+          const dataUrl = s.photo && Photos.isDataURL(s.photo) ? s.photo : await Photos.download(s.photo);
+          const img = await loadImage(dataUrl);
+          const cropped = await cropModal(img);
+          if (!cropped) return;
+          s.photo = cropped;
+          markDirty();
+          item.outerHTML = studentHTML(s);
+        } catch (err) { toast(err.message); }
       } else if (e.target.closest('.photo-btn')) {
         const file = await pickFile('image/*');
         if (!file) return;
